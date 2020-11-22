@@ -1,13 +1,17 @@
 <html>
 
 <head>
-  <title>Express</title>
+  <title>Simple auth</title>
   <link rel="stylesheet" href="/stylesheets/style.css">
 </head>
 
 <body>
-  <h1>Express</h1>
-  <p>Welcome to Express</p>
+  <h1>Simple Auth</h1>
+  <p><strong>GET</strong> /login</p>
+  <p>JWT token is sent back via the headers (x-authorization-token)</p>
+  <br/>
+  <p><strong>GET</strong> /secret</p>
+  <p>This route expects a Bearer token Authorization</p>
 </body>
 
 </html>
