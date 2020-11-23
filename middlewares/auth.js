@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const mockUsers = require('../routes/mockUsers')
 
 const authorizeUser = (req, res, next) => {
   const authHeader = req.headers["authorization"];
@@ -12,4 +13,15 @@ const authorizeUser = (req, res, next) => {
   }
 };
 
-module.exports = authorizeUser;
+const userContext = (req, res, next) => {
+    const user = mockUsers.find(user => user.id === req.data.id)
+    if (!user) return res.status(404).send('No such user')
+    const { password, ...userWithoutPassword } = user
+    req.user = userWithoutPassword
+    next()
+}
+
+module.exports = {
+    authorizeUser,
+    userContext
+};

@@ -1,22 +1,23 @@
 const express = require("express");
 const authRouter = express.Router();
-const authorizeUser = require('../middlewares/auth')
+const { authorizeUser, userContext } = require('../middlewares/auth')
 const jwt = require("jsonwebtoken");
+const mockUsers = require('./mockUsers');
 
-authRouter.post("/login", async (req, res, next) => {
+authRouter.post("/login", async (req, res) => {
     const { username, password } = req.body
-    // This is for demo purposes only; you would **NEVER** hardcode a username and a password
-    // in the clear in your app
-    const credentials = {
-        username: "ben",
-        password: "chicken"
-    }
-    if (credentials.username === username && credentials.password === password) {
+
+    const targetUser = mockUsers.find(user => user.username === username)
+    console.log({targetUser})
+    if (!targetUser) return res.status(404).send('Erroneous connection credentials')
+
+    if (targetUser.username === username && targetUser.password === password) {
         try {
             const token = await jwt.sign(
                 {
-                  id: 1,
-                  data: "somethingNotSecret",
+                  id: targetUser.id,
+                  username: targetUser.username,
+                  admin: targetUser.admin
                 },
                 process.env.JWT_SECRET,
                 { expiresIn: "1h" }
@@ -26,13 +27,18 @@ authRouter.post("/login", async (req, res, next) => {
             res.status(500).send(e.message)
         }
     } else {
+        console.log('here')
         res.status(401).send('Username or password mismatch')
     }
 
 });
 
-authRouter.get("/secret", authorizeUser, (req, res, next) => {
+authRouter.get("/secret", authorizeUser, (req, res) => {
     res.send(req.data)
 }) 
+
+authRouter.get('/me', [authorizeUser, userContext], (req, res) => {
+    res.send(req.user)
+})
 
 module.exports = authRouter;
